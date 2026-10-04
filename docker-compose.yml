@@ -1,0 +1,9 @@
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      # 持久化 SQLite 数据库；导入新版本失败时旧数据不受影响
+      - ./data:/app/data
+    restart: unless-stopped

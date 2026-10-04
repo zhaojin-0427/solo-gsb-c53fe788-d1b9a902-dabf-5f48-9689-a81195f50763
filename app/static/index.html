@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>公交班次换乘查询台</title>
+<style>
+:root { --bd:#d8dde3; --bg:#f5f7fa; --pri:#1a6fe8; --ok:#157f3b; --err:#c0392b; }
+* { box-sizing: border-box; }
+body { margin:0; font-family: -apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+       background:var(--bg); color:#222; }
+header { background:var(--pri); color:#fff; padding:14px 24px; font-size:18px; font-weight:600; }
+main { max-width:960px; margin:20px auto; padding:0 16px; display:grid; gap:16px; }
+.card { background:#fff; border:1px solid var(--bd); border-radius:8px; padding:16px 18px; }
+.card h2 { margin:0 0 12px; font-size:15px; color:#444; }
+label { font-size:13px; color:#555; display:block; margin-bottom:4px; }
+input, select, button { font-size:14px; padding:7px 10px; border:1px solid var(--bd);
+       border-radius:6px; width:100%; }
+.row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.row3 { display:grid; grid-template-columns:1fr 1fr 120px; gap:12px; }
+button { background:var(--pri); color:#fff; border:none; cursor:pointer; font-weight:600; }
+button:disabled { opacity:.55; cursor:default; }
+button.ghost { background:#eef2f7; color:#333; }
+.msg { font-size:13px; margin-top:8px; }
+.msg.ok { color:var(--ok); } .msg.err { color:var(--err); }
+.meta { font-size:12px; color:#777; }
+table { border-collapse:collapse; width:100%; font-size:13px; margin-top:8px; }
+th,td { border:1px solid var(--bd); padding:6px 8px; text-align:left; }
+th { background:#f0f3f7; }
+.journey { border:1px solid var(--bd); border-radius:8px; margin-bottom:12px; overflow:hidden; }
+.journey > .hd { background:#f0f5ff; padding:8px 12px; font-size:13px; display:flex;
+                 justify-content:space-between; flex-wrap:wrap; gap:6px; }
+.seg td:first-child { white-space:nowrap; color:#0a5; font-family:monospace; }
+.seg td:last-child  { white-space:nowrap; color:#c33; font-family:monospace; }
+.badge { display:inline-block; background:#e3edff; color:#1550a8; border-radius:10px;
+         padding:1px 9px; font-size:12px; }
+.empty { color:#888; font-size:13px; padding:8px 0; }
+</style>
+</head>
+<body>
+<header>🚌 公交班次换乘查询台</header>
+<main>
+  <section class="card">
+    <h2>1. 导入时刻表（GTFS Schedule ZIP）</h2>
+    <div class="row">
+      <div><input type="file" id="gtfsFile" accept=".zip"></div>
+      <div><button id="btnImport">上传并整包校验</button></div>
+    </div>
+    <div id="importMsg" class="meta">尚未导入。导入失败（缺引用 / 站时倒序等）会整包拒绝，已有时刻表仍可查询。</div>
+    <div id="datasetInfo" class="meta"></div>
+  </section>
+
+  <section class="card">
+    <h2>2. 查询条件（时刻按所选 agency 时区解释）</h2>
+    <div class="row">
+      <div>
+        <label>起点站（可按名称或 ID 搜索）</label>
+        <input list="stopList" id="origin" autocomplete="off" placeholder="选择或输入起点，如：一广场 (S1)">
+      </div>
+      <div>
+        <label>终点站</label>
+        <input list="stopList" id="destination" autocomplete="off" placeholder="选择或输入终点，如：六站 (S6)">
+      </div>
+    </div>
+    <datalist id="stopList"></datalist>
+    <div class="row3" style="margin-top:12px">
+      <div><label>出发日期</label><input type="date" id="date"></div>
+      <div><label>出发时刻（当地时间 HH:MM）</label><input type="time" id="time" value="08:00"></div>
+      <div><label>换乘上限</label>
+        <select id="maxTransfers">
+          <option value="0">0</option><option value="1">1</option>
+          <option value="2">2</option><option value="3" selected>3</option>
+          <option value="5">5</option><option value="10">10</option>
+        </select>
+      </div>
+    </div>
+    <div style="margin-top:12px"><button id="btnPlan">搜索行程（出发后 24 小时内）</button></div>
+    <div id="planMsg" class="msg"></div>
+  </section>
+
+  <section class="card">
+    <h2>3. 查询结果（按到达时刻与换乘次数保留非支配行程）</h2>
+    <div id="results"><div class="empty">请先导入时刻表并发起查询。</div></div>
+  </section>
+</main>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
